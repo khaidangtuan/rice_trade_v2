@@ -1,0 +1,21 @@
+credentials:
+  usernames:
+    admin:
+      email: admin@vnflow.com
+      failed_login_attempts: 0 # Will be managed automatically
+      logged_in: False # Will be managed automatically
+      name: Admin
+      password: $2b$12$IwCEMkuE273.yjajFw.UweizQRAXbtKwP0dWjGFh9CLtHQUsDwv06 # Will be hashed automatically
+    user:
+      email: user@phoenix.com
+      failed_login_attempts: 0 # Will be managed automatically
+      logged_in: False # Will be managed automatically
+      name: User
+      password: $2b$12$U2RRphjzit75SIyXasfi5uV3mqOwr9f3atWV5ZAAmLA5PMTBe8D9m # Will be hashed automatically
+cookie:
+  expiry_days: 0
+  key: some_signature_key # Must be string
+  name: some_cookie_name
+pre-authorized:
+  emails:
+  - melsby@gmail.com
