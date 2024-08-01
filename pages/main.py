@@ -398,6 +398,7 @@ with overall_area.container(border=True):
                 trading_side = st.multiselect(label='Trading side',
                                               options=['BUYER','NOTIFY PARTY NAME', 'SUPPLIER'],
                                               default='BUYER',
+                                              disabled=True
                 )
                 words_filter = st.multiselect(label='Remove companies which their names includes one of these words',
                                               options=com_name_words(com))
