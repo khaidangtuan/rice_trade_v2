@@ -7,6 +7,7 @@ import streamlit_authenticator as stauth
 from streamlit_option_menu import option_menu
 import os
 import sqlalchemy as sa
+from sqlalchemy import text
 
 # initiate connection & set up db due to size limitation on GitHub
 def db_init():
@@ -211,13 +212,49 @@ def aggregate_filter(df, com, trading_side, transaction, volume, word_filter, ta
     result = result[['Buyer name','Buyer address','Buyer email','Buyer phone',
                      'Notify name','Notify address','Notify email','Notify phone',
                      'Port of lading','Total quantity','Count']]
+    
     result['tag'] = tag
-    result['Email tìm thêm'] = float('nan')
-    result['Phone tìm thêm'] = float('nan')	
-    result['Data status'] = float('nan')
-    result['Email status'] = float('nan')
-    result['Note'] = float('nan')
-    result['Price period'] = float('nan')
+    
+    # check if manual update data is available
+    sql = text(
+    '''SELECT table_name FROM information_schema.tables
+       WHERE table_schema = 'public'
+       ''') 
+
+    with engine.connect() as conn:
+        results = conn.execute(sql)
+    
+    tables = [i[0] for i in results.fetchall()]
+    
+    if 'buyer_info_update' in tables:
+        query = '''
+        SELECT *
+            FROM "buyer_info_update"
+        '''
+        with engine.connect() as conn:
+            buyer_update = pd.read_sql(query, conn)
+        
+        buyer_update = buyer_update.sort_values(by=['updated_at'], ascending=False).drop_duplicates(subset=['buyerName'], keep='first')
+        print(result.shape)
+        result = result.merge(buyer_update, how='left', left_on='Buyer name', right_on='buyerName')
+        result.loc[result['comAddress'].notna(),'Buyer address'] = result.loc[result['comAddress'].notna(),'comAddress']
+        result.loc[result['comEmail'].notna(),'Buyer email'] = result.loc[result['comEmail'].notna(),'comEmail']
+        result.loc[result['comPhone'].notna(),'Buyer phone'] = result.loc[result['comPhone'].notna(),'comPhone']
+        print(result.shape)
+        result = result[['Buyer name','Buyer address','Buyer email','Buyer phone',
+                         'Notify name','Notify address','Notify email','Notify phone',
+                         'Port of lading','Total quantity','Count',
+                         'Email tìm thêm','Phone tìm thêm','Data status',
+                         'Email status','Note','Price period','updated_at']]
+
+    
+    else:
+        result['Email tìm thêm'] = float('nan')
+        result['Phone tìm thêm'] = float('nan')	
+        result['Data status'] = float('nan')
+        result['Email status'] = float('nan')
+        result['Note'] = float('nan')
+        result['Price period'] = float('nan')
 
     return result
     

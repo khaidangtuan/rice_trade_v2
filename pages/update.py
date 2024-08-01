@@ -56,8 +56,8 @@ with st.sidebar:
         st.switch_page('pages/main.py')
     
 def validate(data):
-    columns = ['comName','comAddress','comPhone','comPhone tìm thêm','comEmail','comEmail tìm thêm',
-               'Data Status 1','Email Status 2','Note','Price period ']
+    columns = ['buyerName','comAddress','comPhone','comEmail','Phone tìm thêm','Email tìm thêm',
+               'Data status','Email status','Note','Price period']
     missing_cols = []
     for i in columns:
         if i not in data.columns:
@@ -66,14 +66,10 @@ def validate(data):
     if len(missing_cols) > 0:
         return ', '.join(i for i in missing_cols) + 'not found in the data'
     
-    if len(data['comName'].unique()) != data.shape[0]:
-        return 'comName column is not unique (duplicated comName)'
-    data.rename(columns={'comPhone tìm thêm':'comPhone_append',
-                         'comEmail tìm thêm':'comEmail_append',
-                         'Data Status 1':'dataStatus',
-                         'Email Status 2':'emailStatus',
-                         'Price period':'pricePeriod'}, inplace=True)
-    data['updateDate'] = datetime.now()
+    if len(data['buyerName'].unique()) != data.shape[0]:
+        return 'buyerName column is not unique (duplicated buyerName)'
+    
+    data['updated_at'] = datetime.now()
     
     return data
 
@@ -83,7 +79,7 @@ def upload(data):
     
     engine = sa.create_engine(uri)
     with engine.connect() as conn:
-        data.to_sql('update_data', conn, schema='public', if_exists='append', index=False)
+        data.to_sql('buyer_info_update', conn, schema='public', if_exists='append', index=False)
     
     return 'Done uploading'
  
@@ -113,9 +109,6 @@ def update():
 upload_area = st.empty()
 preview_area = st.empty()
 commit_area = st.empty()
-
-st.error('This function is temporarily blocked until new template are updated')
-st.stop()
 
 with upload_area.container(border=True):
     uploaded_file = st.file_uploader("Choose a file", type=['xlsx'])
@@ -147,13 +140,7 @@ if uploaded_file is not None:
                     status = upload(data)
                     st.success(status)
                 except:
-                    st.error('Uploading failed!')
-                
-                try:
-                    status = update()
-                    st.success(status)
-                except:
-                    st.error('Updating failed!')  
+                    st.error('Uploading failed!') 
         else:
             st.error('Password is WRONG!!!')
 
